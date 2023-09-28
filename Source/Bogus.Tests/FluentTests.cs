@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Bogus.DataSets;
 using Bogus.Extensions;
 using FluentAssertions;
@@ -294,6 +295,33 @@ namespace Bogus.Tests
          public List<Order> Orders { get; set; }
       }
 
+      public abstract class OrderCollection
+      {
+         public int OrderCount => orderIdOrderDictionary.Count;
+         public Order this[int orderId]
+         {
+            get => orderIdOrderDictionary[orderId];
+         }
+         public Order this[string item]
+         {
+            get => itemOrderDictionary[item];
+         }
+
+         public void AddOrder(Order order)
+         {
+            orderIdOrderDictionary.Add(order.OrderId, order);
+            itemOrderDictionary.Add(order.Item, order);
+         }
+
+         private Dictionary<int, Order> orderIdOrderDictionary = new Dictionary<int, Order>();
+         private Dictionary<string, Order> itemOrderDictionary = new Dictionary<string, Order>();
+      }
+
+      public class Cart : OrderCollection
+      {
+         public Guid CartId { get; set; }
+      }
+
       [Fact]
       public void just_want_to_set_a_value()
       {
@@ -416,6 +444,16 @@ namespace Bogus.Tests
             count++;
             if( count > 99 ) break;
          }
+      }
+
+      [Fact]
+      public void can_generate_for_class_with_indexers()
+      {
+         var cartFaker = new Faker<Cart>()
+            .RuleFor(o => o.CartId, f => Guid.NewGuid());
+
+         var cart = cartFaker.Generate();
+         cart.Should().NotBeNull();
       }
    }
 }

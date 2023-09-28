@@ -108,7 +108,8 @@ namespace Bogus
       //write-able.
       protected virtual MemberInfo UseBaseTypeDeclaredPropertyInfo(Type t, MemberInfo m)
       {
-         if( m is PropertyInfo {CanWrite: false} && m.DeclaringType is not null && m.DeclaringType != t )
+         if( m is PropertyInfo {CanWrite: false} && ((PropertyInfo)m).GetIndexParameters().Length == 0 &&
+            m.DeclaringType is not null && m.DeclaringType != t )
          {
             var newPropInfo = m.DeclaringType.GetProperty(m.Name, this.BindingFlags);
             if( newPropInfo is not null )
